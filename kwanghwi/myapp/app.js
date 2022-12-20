@@ -39,6 +39,23 @@ app.get("/ping", (req, res) => {
   res.status(200).json({ message: "pong" });
 });
 
+// 회원가입
+// http -v POST 127.0.0.1:3000/user/signup
+app.post("/user/signup", async (req, res) => {
+  const { userId, password, email, profile_image } = req.body;
+  await myDataSource.query(
+    `INSERT INTO users(
+      userId,
+      password,
+      email,
+      profile_image
+    ) VALUES (?, ?, ?, ?);
+    `,
+    [userId, password, email, profile_image]
+  );
+  res.status(201).json({ message: "signup success!" });
+});
+
 //const server = http.createServer(app);
 
 const start = async () => {

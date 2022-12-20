@@ -1,3 +1,7 @@
+DATABASE_URL="mysql://username:password@127.0.0.1:3306/database_name"
+
+
+DATABASE_URL = URL
 PORT = YOUR PORT NUMBER SHOULD BE HERE!
 
 TYPEORM_CONNECTION = mysql
