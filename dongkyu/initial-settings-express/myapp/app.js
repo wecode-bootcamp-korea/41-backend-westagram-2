@@ -33,7 +33,7 @@ app.use(morgan("dev"));
 
 //health check
 app.get("/ping", (req, res) => {
-  res.status(200).json({ message: "pong" });
+return res.status(200).json({ message: "pong" });
 });
 
 
