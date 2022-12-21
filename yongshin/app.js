@@ -67,6 +67,20 @@ app.post("/post", async (req, res, next) => {
     res.status(201).json({ message : "postCreated"});
 });
 
+app.get("/posts", async (req, res, next) => {
+    await appDataSource.query(
+        `SELECT
+            posts.user_id,
+            users.profile_image,
+            users.id,
+            posts.image_url,
+            posts.content
+        FROM users, posts`
+    , (err, rows) => {
+        res.status(200).json(rows);
+    })
+});
+
 const start = async () => {
     try {
         app.listen(PORT, () => console.log(`server is listening on ${PORT}`));
