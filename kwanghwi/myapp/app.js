@@ -8,7 +8,7 @@ dotenv.config();
 
 const { DataSource } = require("typeorm");
 
-const myDataSource = new DataSource({
+const appDataSource = new DataSource({
   type: process.env.TYPEORM_CONNECTION,
   host: process.env.TYPEORM_HOST,
   port: process.env.TYPEORM_PORT,
@@ -17,7 +17,7 @@ const myDataSource = new DataSource({
   database: process.env.TYPEORM_DATABASE,
 });
 
-myDataSource
+appDataSource
   .initialize()
   .then(() => {
     console.log("Data Source has been initialized!");
@@ -33,17 +33,13 @@ app.use(express.json());
 app.use(cors());
 app.use(morgan("dev"));
 
-// health check
-// http -v GET 127.0.0.1:3000/ping
 app.get("/ping", (req, res) => {
-  res.status(200).json({ message: "pong" });
+  return res.status(200).json({ message: "pong" });
 });
 
-// 회원가입
-// http -v POST 127.0.0.1:3000/user/signup
 app.post("/user/signup", async (req, res) => {
   const { userId, password, email, profile_image } = req.body;
-  await myDataSource.query(
+  await appDataSource.query(
     `INSERT INTO users(
       userId,
       password,
@@ -53,10 +49,8 @@ app.post("/user/signup", async (req, res) => {
     `,
     [userId, password, email, profile_image]
   );
-  res.status(201).json({ message: "signup success!" });
+  return res.status(201).json({ message: "signup success!" });
 });
-
-//const server = http.createServer(app);
 
 const start = async () => {
   try {
