@@ -34,7 +34,7 @@ app.get("/ping", (req, res) => {
 });
 
 //create a userInfo
-app.post("/postman", async (req, res, next) => {
+app.post("/userInfo", async (req, res, next) => {
   const { name, age, email } = req.body;
 
   await myDataSource.query(
@@ -45,27 +45,27 @@ app.post("/postman", async (req, res, next) => {
       `,
     [name, age, email]
   );
-  res.status(201).json({ message: "sucessfully created" });
+  res.status(201).json({ message: "userCreated" });
 });
 
 //Create a book
 
-app.post("/userInfo", async (req, res, next) => {
-  const { title, description, coverImage } = req.body;
+// app.post("/book", async (req, res, next) => {
+//   const { title, description, coverImage } = req.body;
 
-  //console.log(req)
+//   //console.log(req)
 
-  await myDataSource.query(
-    `INSERT INTO books(
-      title,
-      description,
-      cover_image
-      ) VALUES (?, ?, ?);
-    `,
-    [title, description, coverImage]
-  );
-  res.status(201).json({ message: "successfully created" });
-});
+//   await myDataSource.query(
+//     `INSERT INTO books(
+//       title,
+//       description,
+//       cover_image
+//       ) VALUES (?, ?, ?);
+//     `,
+//     [title, description, coverImage]
+//   );
+//   res.status(201).json({ message: "sucessfully created" });
+// });
 
 //Get all books
 // app.get("/books", async (req, res) => {
@@ -119,13 +119,13 @@ app.post("/userInfo", async (req, res, next) => {
 //   res.status(201).json({ message: "successfully updated" });
 // });
 
-//Delete a book
-// app.delete("/books/:bookId", async (req, res) => {
-//   const { bookId } = req.params;
+//Delete a userInfo
+// app.delete("/userInfo/:userId", async (req, res) => {
+//   const { userId } = req.params;
 
 //   await myDataSource.query(
-//     `DELETE FROM books
-//     WHERE books.id = ${bookId}`
+//     `DELETE FROM userInfo
+//     WHERE userInfo.id = ${userId}`
 //   );
 //   res.status(204).json({ message: "successfully deleted" });
 // });
