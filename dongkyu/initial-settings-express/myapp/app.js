@@ -4,7 +4,7 @@ const morgan = require("morgan");
 const dotenv = require("dotenv");
 dotenv.config();
 
-const { DataSource } = require("typeorm");
+const { DataSource, Column } = require("typeorm");
 
 const appDataSource = new DataSource({
   type: process.env.TYPEORM_CONNECTION,
@@ -84,9 +84,10 @@ app.get("/users_posts", async (req, res) => {
       INNER JOIN posts
       ON users.id = posts.user_id`
 ,(err, rows) => {
-  res.status(200).json(rows);
+  res.status(200).json({data : rows});
   })
 })
+
 
 const PORT = process.env.PORT;
 
