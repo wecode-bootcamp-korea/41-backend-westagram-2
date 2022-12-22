@@ -40,6 +40,7 @@ CREATE TABLE `posts` (
   `user_id` int NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `title` varchar(200) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `posts_user_id_fkey` (`user_id`),
   CONSTRAINT `posts_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
@@ -99,5 +100,6 @@ LOCK TABLES `schema_migrations` WRITE;
 INSERT INTO `schema_migrations` (version) VALUES
   ('20221220062637'),
   ('20221220062647'),
-  ('20221220062656');
+  ('20221220062656'),
+  ('20221221081127');
 UNLOCK TABLES;
