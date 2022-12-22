@@ -1,4 +1,3 @@
-const http = require("http");
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
@@ -38,16 +37,16 @@ app.get("/ping", (req, res) => {
 });
 
 app.post("/user/signup", async (req, res) => {
-  const { userId, password, email, profile_image } = req.body;
+  const { userId, password, email, profileImage } = req.body;
   await appDataSource.query(
     `INSERT INTO users(
       userId,
       password,
       email,
-      profile_image
+      profileImage
     ) VALUES (?, ?, ?, ?);
     `,
-    [userId, password, email, profile_image]
+    [userId, password, email, profileImage]
   );
   return res.status(201).json({ message: "signup success!" });
 });
