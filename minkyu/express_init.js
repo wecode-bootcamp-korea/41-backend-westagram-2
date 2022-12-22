@@ -13,7 +13,7 @@ const morgan = require('morgan');
 
 const { DataSource } = require('typeorm');
 
-const myDataSource = new DataSource({
+const database = new DataSource({
     type: process.env. TYPEORM_CONNECTION,
     host: process.env. TYPEORM_HOST,
     port: process.env. TYPEORM_PORT,
@@ -22,9 +22,12 @@ const myDataSource = new DataSource({
     database: process.env. TYPEORM_DATABASE,
 })
 
-myDataSource.initialize()
+database.initialize()
     .then(() => {
         console.log("Data Source has been initialized!")
+    })
+    .catch(err=>{
+        console.log("err");
     });
 
 const app = express();
@@ -36,6 +39,7 @@ app.use(morgan('tiny'));
 app.get("/ping", (req,res) =>{
     res.json({message : "pong"});
 });
+
 
 const PORT = process.env.PORT;
 
