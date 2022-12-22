@@ -40,7 +40,7 @@ app.post("/user/signup", async (req, res) => {
   const { userId, password, name, email, profileImage } = req.body;
   await appDataSource.query(
     `INSERT INTO users(
-      user_id,
+      userId,
       password,
       name,
       email,
