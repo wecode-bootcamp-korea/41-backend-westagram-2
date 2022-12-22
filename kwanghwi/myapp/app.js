@@ -40,7 +40,7 @@ app.post("/user/signup", async (req, res) => {
   const { userId, password, name, email, profileImage } = req.body;
   await appDataSource.query(
     `INSERT INTO users(
-      userId,
+      user_id,
       password,
       name,
       email,
@@ -59,7 +59,7 @@ app.post("/post/create", async (req, res) => {
       title,
       content,
       content_image,
-      userId
+      user_id
     ) VALUES (?, ?, ?, ?);
     `,
     [title, content, content_image, userId]
@@ -70,7 +70,7 @@ app.post("/post/create", async (req, res) => {
 app.get("/posts/get", async (req, res) => {
   await appDataSource.query(
     `SELECT
-            u.id as userId,
+            u.id as user_id,
             u.profile_image as userProfileImage,
             p.id as postingId,
             p.content_image as postingImageUrl,
@@ -89,7 +89,7 @@ app.get("/post/get/:userId", async (req, res) => {
 
   await appDataSource.manager.query(
     `SELECT
-        users.id as userId,
+        users.id as user_id,
         users.profile_image as userProfileImage,
         JSON_ARRAYAGG(JSON_OBJECT("postingId", posts.id, "postingImageUrl", posts.content_image, "postingContent", posts.content)) as postings
     FROM posts
