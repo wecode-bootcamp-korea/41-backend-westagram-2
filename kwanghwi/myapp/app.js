@@ -37,32 +37,32 @@ app.get("/ping", (req, res) => {
 });
 
 app.post("/user/signup", async (req, res) => {
-  const { userId, password, name, email, profile_image } = req.body;
+  const { userId, password, name, email, profileImage } = req.body;
   await appDataSource.query(
     `INSERT INTO users(
       userId,
       password,
       name,
       email,
-      profile_image
+      profileImage
     ) VALUES (?, ?, ?, ?, ?);
     `,
-    [userId, password, name, email, profile_image]
+    [userId, password, name, email, profileImage]
   );
   return res.status(201).json({ message: "signup success!" });
 });
 
 app.post("/post/create", async (req, res) => {
-  const { title, content, content_image, user_id } = req.body;
+  const { title, content, content_image, userId } = req.body;
   await appDataSource.query(
     `INSERT INTO posts(
       title,
       content,
       content_image,
-      user_id
+      userId
     ) VALUES (?, ?, ?, ?);
     `,
-    [title, content, content_image, user_id]
+    [title, content, content_image, userId]
   );
   return res.status(201).json({ message: "postcreate success!" });
 });
