@@ -1,6 +1,8 @@
+const http = require("http");
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
+
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -15,48 +17,32 @@ const appDataSource = new DataSource({
   database: process.env.TYPEORM_DATABASE,
 });
 
-appDataSource.initialize()
+appDataSource
+  .initialize()
   .then(() => {
-    console.log("Data Source has been initialized!")})
-  .catch((err) => {
-    console.log("Failed to connect Database", err)
-    appDataSource.destroy();
+    console.log("Data Source has been initialized!");
+  })
+  .catch(() => {
+    console.log("Promise Rejected!");
   });
 
 const app = express();
+const PORT = process.env.PORT;
 
 app.use(express.json());
 app.use(cors());
 app.use(morgan("dev"));
 
-
 app.get("/ping", (req, res) => {
   return res.status(200).json({ message: "pong" });
 });
 
-
-app.post("/users", async (req, res, next) => {
-  const { name, age, email, password } = req.body
-
-  await myDataSource.query(
-    `INSERT INTO users(
-      name,
-      age,
-      email,
-      password
-    ) VALUES (?, ?, ?, ?);  
-    `,
-    [name, age, email, password]
-  );
-
-  res.status(201).json({ message : "userCreated" });
-})
-
-
-const PORT = process.env.PORT;
-
 const start = async () => {
-  app.listen(PORT, () => console.log(`server is listening on ${PORT}`));
+  try {
+    app.listen(PORT, () => console.log(`server is listening on ${PORT}`));
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 start();
