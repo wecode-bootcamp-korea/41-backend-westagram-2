@@ -35,7 +35,7 @@ app.get("/ping", (req, res) => {
 });
 
 
-app.post("/users", async (req, res, next) => {
+app.post("/users", async (req, res) => {
   const { name, age, email, password } = req.body
 
   await appDataSource.query(
@@ -53,7 +53,7 @@ app.post("/users", async (req, res, next) => {
 })
 
 
-app.post("/posts", async (req, res, next) => {
+app.post("/posts", async (req, res) => {
   const { title, content, user_id } = req.body
 
   await appDataSource.query(
@@ -69,6 +69,24 @@ app.post("/posts", async (req, res, next) => {
   res.status(201).json({ message : "postCreated"})
 })
 
+
+app.get("/users_posts", async (req, res) => {
+  await appDataSource.manager.query(
+    `SELECT
+            users.id as userId,
+            users.age,
+            users.email,
+            users.password,
+            posts.id as postingId,
+            posts.title,
+            posts.content
+      FROM users
+      INNER JOIN posts
+      ON users.id = posts.user_id`
+,(err, rows) => {
+  res.status(200).json(rows);
+  })
+})
 
 const PORT = process.env.PORT;
 
