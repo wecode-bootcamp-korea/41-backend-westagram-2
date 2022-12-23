@@ -42,7 +42,7 @@ app.use(morgan('tiny'));
 app.get("/ping", (req,res) =>{
     res.status(200).json({"message" : "pong"});
 });
-
+        // 유저 회원가입
 app.post("/users", async(req, res) =>{
     const { name, email, password } = req.body;
 
@@ -58,21 +58,23 @@ app.post("/users", async(req, res) =>{
 
     res.status(200).json({ message : "successfully created" });
 })
-
+        // 유저 게시글 올리기
 app.post("/posting", async(req, res) => {
     const {title, content, userId} = req.body;
-
+    console.log(userId)
     await database.query(
         `INSERT INTO posts(
             title,
             content,
-            userId
+            user_id
         ) VALUES (?, ?, ?)
         `,
         [ title, content, userId ]
     );
     res.status(200).json({ message : "postCreated" });
 })
+
+app.get("/")
 
 const PORT = process.env.PORT;
 
