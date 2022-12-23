@@ -52,7 +52,7 @@ app.post("/user/signup", async (req, res) => {
   return res.status(201).json({ message: "signup success!" });
 });
 
-app.post("/post/create", async (req, res) => {
+app.post("/posts", async (req, res) => {
   const { title, content, content_image, userId } = req.body;
   await appDataSource.query(
     `INSERT INTO posts(
@@ -67,7 +67,7 @@ app.post("/post/create", async (req, res) => {
   return res.status(201).json({ message: "postcreate success!" });
 });
 
-app.get("/posts/get", async (req, res) => {
+app.get("/posts", async (req, res) => {
   await appDataSource.query(
     `SELECT
             u.id as user_id,
@@ -84,7 +84,7 @@ app.get("/posts/get", async (req, res) => {
   );
 });
 
-app.get("/post/get/:userId", async (req, res) => {
+app.get("/users/:userId/posts", async (req, res) => {
   const { userId } = req.params;
 
   await appDataSource.manager.query(
@@ -102,7 +102,7 @@ app.get("/post/get/:userId", async (req, res) => {
   );
 });
 
-app.patch("/post/patch/", async (req, res) => {
+app.patch("/post", async (req, res) => {
   const { userId, postId, title, content } = req.body;
 
   await appDataSource.manager.query(
@@ -134,7 +134,7 @@ app.patch("/post/patch/", async (req, res) => {
   return res.status(201).json({ data: postRow });
 });
 
-app.delete("/post/delete", async (req, res) => {
+app.delete("/post", async (req, res) => {
   const { userId, postId } = req.body;
 
   await appDataSource.manager.query(
@@ -165,7 +165,7 @@ app.post("/like", async (req, res) => {
 
 const start = async () => {
   try {
-    app.listen(3000, () => console.log(`server is listening on ${PORT}`));
+    app.listen(PORT, () => console.log(`server is listening on ${PORT}`));
   } catch (err) {
     console.log(err);
   }
