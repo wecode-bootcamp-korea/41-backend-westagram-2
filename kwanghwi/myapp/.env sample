@@ -1,0 +1,11 @@
+DATABASE_URL="rdbmsType://username:password@iphost:portNumber/databaseName"
+
+PORT = YOUR PORT NUMBER SHOULD BE HERE!
+
+TYPEORM_CONNECTION = rdbms
+TYPEORM_HOST = localhost
+TYPEORM_USERNAME = username
+TYPEORM_PASSWORD = myPassword
+TYPEORM_DATABASE = myDB
+TYPEORM_PORT = dbPort
+TYPEORM_LOGGING =TRUE
