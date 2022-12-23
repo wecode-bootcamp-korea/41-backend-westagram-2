@@ -88,6 +88,29 @@ app.get("/posts", async (req, res) => {
   })
 })
 
+  app.get("/postings/:userId", async (req, res) => {
+    const { userId } = req.params;
+  
+    await appDataSource.query(
+      `SELECT
+        users.id,
+        users.name,
+        JSON_ARRAYAGG(
+          JSON_OBJECT(
+          "postingId", posts.id,
+          "postingTitle", posts.title,
+          "postingContent", posts.content
+          )
+        ) as postings
+      FROM users
+      JOIN posts
+      ON users.id = posts.user_id AND users.id = ${userId}
+      GROUP BY users.id`  
+  ,(err, rows) => {
+    res.status(200).json({ data : rows });
+    })
+  })
+
 
 const PORT = process.env.PORT;
 
