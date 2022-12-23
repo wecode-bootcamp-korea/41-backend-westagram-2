@@ -54,16 +54,16 @@ app.post("/users", async (req, res) => {
 
 
 app.post("/posts", async (req, res) => {
-  const { title, content, user_id } = req.body
+  const { title, content, userId } = req.body
 
   await appDataSource.query(
     `INSERT INTO posts(
       title,
       content,
-      user_id
+      userId
     ) VALUES (?, ?, ?);
     `,
-    [title, content, user_id]
+    [title, content, userId]
   );
 
   res.status(201).json({ message : "postCreated"})
