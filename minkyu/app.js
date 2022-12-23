@@ -1,6 +1,8 @@
+
 // env variables
 
-require("dotenv").config();
+const dotenv = require("dotenv")
+dotenv.config();
 
 // built-in package
 
@@ -9,6 +11,7 @@ require("dotenv").config();
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
+ 
 
 
 const { DataSource } = require('typeorm');
@@ -41,25 +44,35 @@ app.get("/pings", (req,res) =>{
 });
 
 app.post("/users", async(req, res) =>{
-    const { id, name, email, password } = req.body;
-
-    // console.log(req)
+    const { name, email, password } = req.body;
 
     await database.query(
         `INSERT INTO users(
-            id,
             name,
             email,
             password
         ) VALUES (?, ?, ?, ?);
         `,
-        [ id, name, email, password ]
+        [ name, email, password ]
     );
 
     res.status(201).json({ message : "successfully created" });
 })
 
+app.post("/posting", async(req, res) => {
+    const {title, content, user_id} = req.body;
 
+    await database.query(
+        `INSERT INTO posts(
+            title,
+            content,
+            user_id
+        ) VALUES (?, ?, ?)
+        `,
+        [ title, content, user_id ]
+    );
+    res.status(201).json({ message : "postCreated" });
+})
 
 const PORT = process.env.PORT;
 
