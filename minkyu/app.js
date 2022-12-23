@@ -44,18 +44,19 @@ app.get("/pings", (req,res) =>{
 });
 
 app.post("/users", async(req, res) =>{
-    const { name, email, password } = req.body;
+    const { id, name, email, password } = req.body;
 
     // console.log(req)
 
     await database.query(
-        `INSERT INTO sign(
+        `INSERT INTO users(
+            id,
             name,
             email,
             password
-        ) VALUES (?, ?, ?);
+        ) VALUES (?, ?, ?, ?);
         `,
-        [ name, email, password ]
+        [ id, name, email, password ]
     );
 
     res.status(201).json({ message : "successfully created" });
