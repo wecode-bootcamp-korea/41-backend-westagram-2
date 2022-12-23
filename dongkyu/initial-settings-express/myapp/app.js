@@ -89,10 +89,6 @@ app.get("/posts", async (req, res) => {
 })
 
 
-
-
-
-
 const PORT = process.env.PORT;
 
 const start = async () => {
