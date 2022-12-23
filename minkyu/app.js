@@ -39,8 +39,8 @@ app.use(express.json());
 app.use(cors());
 app.use(morgan('tiny'));
 
-app.get("/pings", (req,res) =>{
-    res.status(201).json({"message" : "pong"});
+app.get("/ping", (req,res) =>{
+    res.status(200).json({"message" : "pong"});
 });
 
 app.post("/users", async(req, res) =>{
@@ -51,27 +51,27 @@ app.post("/users", async(req, res) =>{
             name,
             email,
             password
-        ) VALUES (?, ?, ?, ?);
+        ) VALUES (?, ?, ?);
         `,
         [ name, email, password ]
     );
 
-    res.status(201).json({ message : "successfully created" });
+    res.status(200).json({ message : "successfully created" });
 })
 
 app.post("/posting", async(req, res) => {
-    const {title, content, user_id} = req.body;
+    const {title, content, userId} = req.body;
 
     await database.query(
         `INSERT INTO posts(
             title,
             content,
-            user_id
+            userId
         ) VALUES (?, ?, ?)
         `,
-        [ title, content, user_id ]
+        [ title, content, userId ]
     );
-    res.status(201).json({ message : "postCreated" });
+    res.status(200).json({ message : "postCreated" });
 })
 
 const PORT = process.env.PORT;
