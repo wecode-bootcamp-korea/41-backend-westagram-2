@@ -156,6 +156,21 @@ app.get("/posts", async (req, res) => {
   });
   
    
+  app.post("/likes", async (req, res) => {
+    const {userId, postId} = req.body
+
+    await appDataSource.query(
+      `INSERT INTO likes (
+        user_id,
+        post_id
+      ) VALUES (?, ?);
+      `,
+      [userId, postId]
+    );
+    res.status(201).json({ message : "likeCreated"})
+  })
+
+
 
 const PORT = process.env.PORT;
 
