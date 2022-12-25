@@ -112,6 +112,40 @@ app.get("/posts", async (req, res) => {
   })
 
 
+  app.patch("/posts/:postId", async (req, res) => {
+    
+    const { postId } = req.params; 
+
+    const { title, content, userId} = req.body
+     
+    await appDataSource.query(
+      `UPDATE posts
+        SET 
+          title = ?,
+          content = ?
+        WHERE user_id = ?
+      `,
+      [ title, content, userId ]
+   );
+  
+    await appDataSource.query(
+      `SELECT
+        users.id as userId,
+        users.name as userName,
+        posts.id as postingId,
+        posts.title as postingTitle,
+        posts.content as postingContent
+      FROM users
+      JOIN posts
+      ON users.id = posts.user_id AND posts.id = ${postId}
+      `,
+      (err, rows) => {
+      res.status(201).json({data: rows})
+  });
+    
+  })
+   
+
 const PORT = process.env.PORT;
 
 const start = async () => {
