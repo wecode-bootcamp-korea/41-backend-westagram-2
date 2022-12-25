@@ -60,7 +60,7 @@ app.post("/posts", async (req, res) => {
     `INSERT INTO posts(
       title,
       content,
-      userId
+      user_id
     ) VALUES (?, ?, ?);
     `,
     [title, content, userId]
@@ -142,8 +142,19 @@ app.get("/posts", async (req, res) => {
       (err, rows) => {
       res.status(201).json({data: rows})
   });
-    
   })
+
+
+  app.delete('/posts/:postId', async (req, res) => {
+    const { postId } = req.params;
+    await appDataSource.query(
+      `DELETE FROM posts
+        WHERE posts.id = ${postId}
+        `
+    )
+    res.status(200).json({ message: 'postingDeleted' });
+  });
+  
    
 
 const PORT = process.env.PORT;
