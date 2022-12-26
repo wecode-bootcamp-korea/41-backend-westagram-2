@@ -1,6 +1,9 @@
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const { validateToken } = require("./auth");
 
 const dotenv = require("dotenv");
 dotenv.config();
@@ -37,23 +40,57 @@ app.get("/ping", (req, res) => {
 });
 
 app.post("/user/signup", async (req, res) => {
-  const { userId, password, name, email, profileImage } = req.body;
+  const { userId, name, password, email, profileImage } = req.body;
+  const saltRounds = 12;
+
+  const makeHash = async (password, saltRounds) => {
+    return await bcrypt.hash(password, saltRounds);
+  };
+
+  const hashedPassword = await makeHash(password, saltRounds);
+
   await appDataSource.query(
     `INSERT INTO users(
       user_id,
-      password,
       name,
+      password,
       email,
       profile_image
     ) VALUES (?, ?, ?, ?, ?);
     `,
-    [userId, password, name, email, profileImage]
+    [userId, name, hashedPassword, email, profileImage]
   );
   return res.status(201).json({ message: "signup success!" });
 });
 
-app.post("/posts", async (req, res) => {
+app.post("/user/signin", async (req, res) => {
+  const { userId, password } = req.body;
+
+  const [selectQuery] = await appDataSource.query(
+    `SELECT
+      user_id,
+      password
+    FROM users
+    WHERE user_id = ?
+    `,
+    [userId]
+  );
+
+  const checkHash = async (password, hashedPassword) => {
+    return await bcrypt.compare(password, hashedPassword);
+  };
+
+  await checkHash(password, selectQuery.password);
+
+  const payLoad = { password: selectQuery.password };
+  const jwtToken = jwt.sign(payLoad, process.env.secretKey);
+
+  return res.status(200).json({ data: jwtToken });
+});
+
+app.post("/posts", validateToken, async (req, res) => {
   const { title, content, contentImage, userId } = req.body;
+
   await appDataSource.query(
     `INSERT INTO posts(
       title,
