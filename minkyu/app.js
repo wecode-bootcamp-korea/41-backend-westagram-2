@@ -32,9 +32,10 @@ app.use(morgan('tiny'));
 app.get("/ping", (req,res) =>{
     res.json({message : "pong"});
 });
-
+    // 게시글 등록하기
 app.post("/posting", async(req, res) => {
     const {title, content, userId} = req.body;
+    console.log(title, content, userId);
     await database.query(
         `INSERT INTO posts(
             title,
@@ -46,7 +47,7 @@ app.post("/posting", async(req, res) => {
     );
     res.status(200).json({ message : "postCreated" });
 });
-
+    // 게시물 조회하기
 app.get("/check", async(req, res) =>{
     await database.query(
         `SELECT
