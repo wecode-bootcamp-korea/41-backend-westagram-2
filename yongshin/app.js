@@ -1,9 +1,9 @@
-const express = require("express");
-const cors = require("cors");
-const morgan = require("morgan");
-const dotenv = require("dotenv");
-dotenv.config();
+const http = require('http');
 
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const morgan = require('morgan');
 const { DataSource } = require('typeorm');
 
 const appDataSource = new DataSource({
@@ -15,6 +15,8 @@ const appDataSource = new DataSource({
     database: process.env.TYPEORM_DATABASE
 });
 
+const app = express();
+
 appDataSource.initialize()
     .then(() => {
         console.log("Data Source has been initialized!");
@@ -24,7 +26,6 @@ appDataSource.initialize()
     appDataSource.destroy()
     })
 
-const app = express();
 const PORT = process.env.PORT;
 
 app.use(cors());
