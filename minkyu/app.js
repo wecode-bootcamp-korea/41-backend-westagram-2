@@ -54,7 +54,8 @@ app.get("/check", async(req, res) =>{
                 users.id as userId,
                 users.profile_image as userProfileImage,
                 posts.id as postingId,
-                posts.image_url as postingImageUrl 
+                posts.image_url as postingImageUrl,
+                posts.content as postingContent 
             FROM posts
         INNER JOIN users ON users.id = posts.user_id;
         `,
