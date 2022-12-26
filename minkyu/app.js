@@ -35,7 +35,6 @@ app.get("/ping", (req,res) =>{
 
 app.post("/posting", async(req, res) => {
     const {title, content, userId} = req.body;
-    console.log(userId)
     await database.query(
         `INSERT INTO posts(
             title,
@@ -48,19 +47,21 @@ app.post("/posting", async(req, res) => {
     res.status(200).json({ message : "postCreated" });
 });
 
-app.get("/check", (req,res) =>{
-    await DataSource.query(
+app.get("/check", async(req, res) =>{
+    await database.query(
         `SELECT
-        users.id as userId,
-        users.profile_image as userProfileImage,
-        posts.id as postingId,
-        posts.image_url as postingImageUrl 
-        FROM users
-        INNER JOIN posts ON users.id = posts.user_id
+                users.id as userId,
+                users.profile_image as userProfileImage,
+                posts.id as postingId,
+                posts.image_url as postingImageUrl 
+            FROM posts
+        INNER JOIN users ON users.id = posts.user_id;
         `,
-        res.status(200,{})
-    )
-})
+        (err, rows) => {
+            return res.status(200).json({data : rows});    
+        }
+    );
+});
 const PORT = process.env.PORT;
 
 const start = async () => {
