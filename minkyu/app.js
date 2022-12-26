@@ -1,20 +1,13 @@
-
-// env variables
-
-const dotenv = require("dotenv")
-dotenv.config();
-
-// built-in package
-
-
+// built-in packages
 // third party packages
+const dotenv = require("dotenv").config();
 const express = require('express');
 const cors = require('cors');
-const morgan = require('morgan');
- 
-
-
+const morgan = require('morgan'); 
 const { DataSource } = require('typeorm');
+
+//custom packages
+const app = express();
 
 const database = new DataSource({
     type: process.env. TYPEORM_CONNECTION,
@@ -32,8 +25,6 @@ database.initialize()
     .catch(err=>{
         console.log("err");
     });
-
-const app = express();
 
 app.use(express.json());
 app.use(cors());
@@ -73,8 +64,6 @@ app.post("/posting", async(req, res) => {
     );
     res.status(200).json({ message : "postCreated" });
 })
-
-app.get("/")
 
 const PORT = process.env.PORT;
 
