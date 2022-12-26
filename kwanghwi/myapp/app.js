@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
+const bcrypt = require("bcrypt");
 
 const dotenv = require("dotenv");
 dotenv.config();
@@ -37,16 +38,25 @@ app.get("/ping", (req, res) => {
 });
 
 app.post("/user/signup", async (req, res) => {
-  const { userId, password, email, profileImage } = req.body;
+  const { userId, name, password, email, profileImage } = req.body;
+  const saltRounds = 12;
+
+  const makeHash = async (password, saltRounds) => {
+    return await bcrypt.hash(password, saltRounds);
+  };
+
+  const hashedPassword = await makeHash(password, saltRounds);
+
   await appDataSource.query(
     `INSERT INTO users(
       user_id,
+      name,
       password,
       email,
-      profileImage
-    ) VALUES (?, ?, ?, ?);
+      profile_image
+    ) VALUES (?, ?, ?, ?, ?);
     `,
-    [userId, password, email, profileImage]
+    [userId, name, hashedPassword, email, profileImage]
   );
   return res.status(201).json({ message: "signup success!" });
 });
