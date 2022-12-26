@@ -1,8 +1,8 @@
 // built-in packages
 // third party packages
 const dotenv = require("dotenv").config();
-const express = require('express');
 const cors = require('cors');
+const express = require('express');
 const morgan = require('morgan'); 
 const { DataSource } = require('typeorm');
 
@@ -46,24 +46,8 @@ app.post("/users", async(req, res) =>{
         `,
         [ name, email, password ]
     );
-
     res.status(200).json({ message : "successfully created" });
-})
-        // 유저 게시글 올리기
-app.post("/posting", async(req, res) => {
-    const {title, content, userId} = req.body;
-    console.log(userId)
-    await database.query(
-        `INSERT INTO posts(
-            title,
-            content,
-            user_id
-        ) VALUES (?, ?, ?)
-        `,
-        [ title, content, userId ]
-    );
-    res.status(200).json({ message : "postCreated" });
-})
+});
 
 const PORT = process.env.PORT;
 
