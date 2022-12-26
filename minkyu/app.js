@@ -1,17 +1,12 @@
-// env variables
-
-require("dotenv").config();
-
-// built-in package
-
-
 // third party packages
+require("dotenv").config();
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
-
-
 const { DataSource } = require('typeorm');
+
+// custom package
+const app = express();
 
 const database = new DataSource({
     type: process.env. TYPEORM_CONNECTION,
@@ -30,8 +25,6 @@ database.initialize()
         console.log("err");
     });
 
-const app = express();
-
 app.use(express.json());
 app.use(cors());
 app.use(morgan('tiny'));
@@ -40,7 +33,19 @@ app.get("/ping", (req,res) =>{
     res.json({message : "pong"});
 });
 
-
+app.get("/check", (req,res) =>{
+    await DataSource.query(
+        `SELECT
+        users.id as userId,
+        users.profile_image as userProfileImage,
+        posts.id as postingId,
+        posts.image_url as postingImageUrl 
+        FROM users
+        INNER JOIN posts ON users.id = posts.user_id
+        `,
+        res.status(200,{})
+    )
+})
 const PORT = process.env.PORT;
 
 const start = async () => {
