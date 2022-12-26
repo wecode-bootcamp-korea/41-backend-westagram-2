@@ -153,38 +153,15 @@ app.delete("/post", async (req, res) => {
 
 app.post("/like", async (req, res) => {
   const { userId, postId } = req.body;
-  console.log("userId:", userId);
-  console.log("postId:", postId);
-
-  const [selectQuery] = await appDataSource.manager.query(
-    `SELECT
-      user_id,
-      id
-    FROM posts
-    WHERE
-      user_id = ?
-    AND
-      id = ?
-    `,
-    [userId, postId]
-  );
-
-  if (
-    selectQuery.user_id != Number(userId) ||
-    selectQuery.id != Number(postId)
-  ) {
-    await appDataSource.manager.query(
-      `INSERT INTO likes(
+  await appDataSource.manager.query(
+    `INSERT INTO likes(
       user_id,
       post_id
     ) VALUES (?, ?);
     `,
-      [userId, postId]
-    );
-
-    return res.status(200).json({ message: "likeCreated" });
-  }
-  return res.status(200).json({ message: "like already exists" });
+    [userId, postId]
+  );
+  return res.status(200).json({ message: "likeCreated" });
 });
 
 const start = async () => {
