@@ -1,3 +1,4 @@
+const bcrypt = require("bcrypt");
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
@@ -37,7 +38,7 @@ app.get("/ping", (req, res) => {
 
 app.post("/users", async (req, res) => {
   const { name, age, email, password } = req.body
-
+  const hashedPassword = await bcrypt.hash(req.body.password, 12)
   await appDataSource.query(
     `INSERT INTO users(
       name,
@@ -46,7 +47,7 @@ app.post("/users", async (req, res) => {
       password
     ) VALUES (?, ?, ?, ?);  
     `,
-    [name, age, email, password]
+    [name, age, email, hashedPassword]
   );
 
   res.status(201).json({ message : "userCreated" });
@@ -54,7 +55,7 @@ app.post("/users", async (req, res) => {
 
 
 app.post("/posts", async (req, res) => {
-  const { title, content, user_id } = req.body
+  const { title, content, userId } = req.body
 
   await appDataSource.query(
     `INSERT INTO posts(
@@ -63,7 +64,7 @@ app.post("/posts", async (req, res) => {
       user_id
     ) VALUES (?, ?, ?);
     `,
-    [title, content, user_id]
+    [title, content, userId]
   );
 
   res.status(201).json({ message : "postCreated"})
@@ -88,6 +89,89 @@ app.get("/posts", async (req, res) => {
   })
 })
 
+  app.get("/postings/:userId", async (req, res) => {
+    const { userId } = req.params;
+  
+    await appDataSource.query(
+      `SELECT
+        users.id,
+        users.name,
+        JSON_ARRAYAGG(
+          JSON_OBJECT(
+          "postingId", posts.id,
+          "postingTitle", posts.title,
+          "postingContent", posts.content
+          )
+        ) as postings
+      FROM users
+      JOIN posts
+      ON users.id = posts.user_id AND users.id = ${userId}
+      GROUP BY users.id`  
+  ,(err, rows) => {
+    res.status(200).json({ data : rows });
+    })
+  })
+
+
+  app.patch("/posts/:postId", async (req, res) => {
+    
+    const { postId } = req.params; 
+
+    const { title, content, userId} = req.body
+     
+    await appDataSource.query(
+      `UPDATE posts
+        SET 
+          title = ?,
+          content = ?
+        WHERE user_id = ?
+      `,
+      [ title, content, userId ]
+   );
+  
+    await appDataSource.query(
+      `SELECT
+        users.id as userId,
+        users.name as userName,
+        posts.id as postingId,
+        posts.title as postingTitle,
+        posts.content as postingContent
+      FROM users
+      JOIN posts
+      ON users.id = posts.user_id AND posts.id = ${postId}
+      `,
+      (err, rows) => {
+      res.status(201).json({data: rows})
+  });
+  })
+
+
+  app.delete('/posts/:postId', async (req, res) => {
+    const { postId } = req.params;
+    await appDataSource.query(
+      `DELETE FROM posts
+        WHERE posts.id = ${postId}
+        `
+    )
+    res.status(200).json({ message: 'postingDeleted' });
+  });
+  
+   
+  app.post("/likes", async (req, res) => {
+    const {userId, postId} = req.body
+
+    await appDataSource.query(
+      `INSERT INTO likes (
+        user_id,
+        post_id
+      ) VALUES (?, ?);
+      `,
+      [userId, postId]
+    );
+    res.status(201).json({ message : "likeCreated"})
+  })
+
+
 
 const PORT = process.env.PORT;
 
@@ -96,3 +180,5 @@ const start = async () => {
 };
 
 start();
+
+
