@@ -33,6 +33,21 @@ app.get("/ping", (req,res) =>{
     res.json({message : "pong"});
 });
 
+app.post("/posting", async(req, res) => {
+    const {title, content, userId} = req.body;
+    console.log(userId)
+    await database.query(
+        `INSERT INTO posts(
+            title,
+            content,
+            user_id
+        ) VALUES (?, ?, ?)
+        `,
+        [ title, content, userId ]
+    );
+    res.status(200).json({ message : "postCreated" });
+});
+
 app.get("/check", (req,res) =>{
     await DataSource.query(
         `SELECT
