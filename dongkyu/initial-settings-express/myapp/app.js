@@ -1,4 +1,3 @@
-
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
@@ -7,7 +6,7 @@ dotenv.config();
 
 const { DataSource } = require("typeorm");
 
-const myDataSource = new DataSource({
+const appDataSource = new DataSource({
   type: process.env.TYPEORM_CONNECTION,
   host: process.env.TYPEORM_HOST,
   port: process.env.TYPEORM_PORT,
@@ -16,7 +15,7 @@ const myDataSource = new DataSource({
   database: process.env.TYPEORM_DATABASE,
 });
 
-myDataSource.initialize()
+appDataSource.initialize()
   .then(() => {
     console.log("Data Source has been initialized!")})
   .catch((err) => {
@@ -31,10 +30,86 @@ app.use(cors());
 app.use(morgan("dev"));
 
 
-//health check
 app.get("/ping", (req, res) => {
   return res.status(200).json({ message: "pong" });
 });
+
+
+app.post("/users", async (req, res) => {
+  const { name, age, email, password } = req.body
+
+  await appDataSource.query(
+    `INSERT INTO users(
+      name,
+      age,
+      email,
+      password
+    ) VALUES (?, ?, ?, ?);  
+    `,
+    [name, age, email, password]
+  );
+
+  res.status(201).json({ message : "userCreated" });
+})
+
+
+app.post("/posts", async (req, res) => {
+  const { title, content, userId } = req.body
+
+  await appDataSource.query(
+    `INSERT INTO posts(
+      title,
+      content,
+      userId
+    ) VALUES (?, ?, ?);
+    `,
+    [title, content, userId]
+  );
+
+  res.status(201).json({ message : "postCreated"})
+})
+
+
+app.get("/posts", async (req, res) => {
+  await appDataSource.query(
+    `SELECT
+            users.id as userId,
+            users.age,
+            users.email,
+            users.password,
+            posts.id as postingId,
+            posts.title,
+            posts.content
+      FROM users
+      INNER JOIN posts
+      ON users.id = posts.user_id`
+,(err, rows) => {
+  res.status(200).json({data : rows});
+  })
+})
+
+  app.get("/postings/:userId", async (req, res) => {
+    const { userId } = req.params;
+  
+    await appDataSource.query(
+      `SELECT
+        users.id,
+        users.name,
+        JSON_ARRAYAGG(
+          JSON_OBJECT(
+          "postingId", posts.id,
+          "postingTitle", posts.title,
+          "postingContent", posts.content
+          )
+        ) as postings
+      FROM users
+      JOIN posts
+      ON users.id = posts.user_id AND users.id = ${userId}
+      GROUP BY users.id`  
+  ,(err, rows) => {
+    res.status(200).json({ data : rows });
+    })
+  })
 
 
 const PORT = process.env.PORT;
