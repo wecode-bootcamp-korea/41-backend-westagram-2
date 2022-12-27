@@ -38,7 +38,8 @@ app.get("/ping", (req, res) => {
 
 app.post("/users", async (req, res) => {
   const { name, age, email, password } = req.body
-  const hashedPassword = await bcrypt.hash(req.body.password, 12)
+  const hashedPassword = await bcrypt.hash(password, 12)
+  console.log("created Hot and Fresh", hashedPassword)
   await appDataSource.query(
     `INSERT INTO users(
       name,
@@ -170,6 +171,31 @@ app.get("/posts", async (req, res) => {
     );
     res.status(201).json({ message : "likeCreated"})
   })
+
+
+  app.post("/login", async (req, res) => {
+   
+  const { email } = req.body
+  
+  const [ userData ] = await appDataSource.query(
+    `SELECT 
+    users.password
+    FROM users
+    WHERE email = ?`,
+    [ email ]
+  );
+  const hashedPassword = userData.password;
+  console.log("????????????????????hashedPassword", hashedPassword)  
+  const password = req.body.password
+  console.log(password)
+  const checkHash = async (password, hashedPassword) => {
+    return await bcrypt.compare(password, hashedPassword) 
+  }
+  const main = async () => {
+  const result = await checkHash(password, hashedPassword);
+  console.log(result);
+  }
+})
 
 
 
