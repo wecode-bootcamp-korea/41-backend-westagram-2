@@ -48,7 +48,7 @@ app.post("/posting", async(req, res) => {
     res.status(200).json({ message : "postCreated" });
 });
     // 게시물 조회하기
-app.get("/check", async(req, res) =>{
+app.get("/check", async(req, res) => {
     await database.query(
         `SELECT
                 users.id as userId,
@@ -63,6 +63,23 @@ app.get("/check", async(req, res) =>{
             return res.status(200).json({data : rows});    
         }
     );
+});
+    // 유저의 게시글 조회하기
+app.get("/pcheck/:userId", async(req, res) =>{
+    const { userId } = req.params;
+    await database.query(
+        `SELECT
+                users.id as userId,
+                users.profile_image as userProfileImage,
+                JSON_ARRAYGG(JSON_OBJECT(   "postingId", post.post_id, 
+                                            "postingImage", post.image_url,
+                                            "postContent", post.content)) as postings
+            FROM posts
+        INNER JOIN users ON users_id = posts.user_id
+        WHERE posts.user_id = ?;
+        `, [ userId ]
+    );                                       // json_object일 경우에는 "key", value, . . . 
+        return res.status(200).json({ data : pcheck });
 });
 const PORT = process.env.PORT;
 
