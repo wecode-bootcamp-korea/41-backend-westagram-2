@@ -1,9 +1,7 @@
-const express = require("express");
-const cors = require("cors");
-const morgan = require("morgan");
-const dotenv = require("dotenv");
-dotenv.config();
-
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const morgan = require('morgan');
 const { DataSource } = require('typeorm');
 
 const appDataSource = new DataSource({
@@ -15,6 +13,8 @@ const appDataSource = new DataSource({
     database: process.env.TYPEORM_DATABASE
 });
 
+const app = express();
+
 appDataSource.initialize()
     .then(() => {
         console.log("Data Source has been initialized!");
@@ -24,7 +24,6 @@ appDataSource.initialize()
     appDataSource.destroy()
     })
 
-const app = express();
 const PORT = process.env.PORT;
 
 app.use(cors());
@@ -34,6 +33,23 @@ app.use(express.json());
 // health check
 app.get("/ping", (req, res) => {
     res.status(200).json({ "message" : "pong" });
+});
+
+app.post("/signup", async (req, res, next) => {
+    const { name, email, profileImage, password } = req.body
+
+    await appDataSource.query(
+        `INSERT INTO users(
+            name,
+            email,
+            profile_image,
+            password
+        ) VALUES (?, ?, ?, ?);
+        `,
+        [ name, email, profileImage, password ]
+    );
+
+    res.status(201).json({ message : "userCreated"});
 });
 
 const start = async () => {

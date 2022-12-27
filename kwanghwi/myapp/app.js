@@ -68,6 +68,31 @@ app.post("/user/signin", async (req, res) => {
 
   const [user] = await appDataSource.query(
     `SELECT
+      user_id,
+      password
+    FROM users
+    WHERE user_id = ?
+    `,
+    [userId]
+  );
+
+  const match = await bcrypt.compare(password, user.password);
+
+  if (!match) {
+    return res.status(400).json({ message: "invalid user" });
+  }
+
+  const payLoad = { id: user.id };
+  const jwtToken = jwt.sign(payLoad, process.env.secretKey);
+
+  return res.status(200).json({ data: jwtToken });
+});
+
+app.post("/user/signin", async (req, res) => {
+  const { userId, password } = req.body;
+
+  const [user] = await appDataSource.query(
+    `SELECT
       id,
       user_id,
       password
@@ -191,38 +216,15 @@ app.delete("/post", async (req, res) => {
 
 app.post("/like", async (req, res) => {
   const { userId, postId } = req.body;
-  console.log("userId:", userId);
-  console.log("postId:", postId);
-
-  const [selectQuery] = await appDataSource.manager.query(
-    `SELECT
-      user_id,
-      id
-    FROM posts
-    WHERE
-      user_id = ?
-    AND
-      id = ?
-    `,
-    [userId, postId]
-  );
-
-  if (
-    selectQuery.user_id != Number(userId) ||
-    selectQuery.id != Number(postId)
-  ) {
-    await appDataSource.manager.query(
-      `INSERT INTO likes(
+  await appDataSource.manager.query(
+    `INSERT INTO likes(
       user_id,
       post_id
     ) VALUES (?, ?);
     `,
-      [userId, postId]
-    );
-
-    return res.status(200).json({ message: "likeCreated" });
-  }
-  return res.status(200).json({ message: "like already exists" });
+    [userId, postId]
+  );
+  return res.status(200).json({ message: "likeCreated" });
 });
 
 const start = async () => {
