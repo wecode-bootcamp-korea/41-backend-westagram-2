@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const dotenv = require("dotenv");
 dotenv.config();
@@ -59,6 +60,31 @@ app.post("/user/signup", async (req, res) => {
     [userId, name, hashedPassword, email, profileImage]
   );
   return res.status(201).json({ message: "signup success!" });
+});
+
+app.post("/user/signin", async (req, res) => {
+  const { userId, password } = req.body;
+
+  const [user] = await appDataSource.query(
+    `SELECT
+      user_id,
+      password
+    FROM users
+    WHERE user_id = ?
+    `,
+    [userId]
+  );
+
+  const match = await bcrypt.compare(password, user.password);
+
+  if (!match) {
+    return res.status(400).json({ message: "invalid user" });
+  }
+
+  const payLoad = { id: user.id };
+  const jwtToken = jwt.sign(payLoad, process.env.secretKey);
+
+  return res.status(200).json({ data: jwtToken });
 });
 
 app.post("/posts", async (req, res) => {
