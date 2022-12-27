@@ -69,7 +69,7 @@ app.post("/posts", async (req, res) => {
 });
 
 app.get("/posts", async (req, res) => {
-  await appDataSource.query(
+  const rows = await appDataSource.query(
     `SELECT
             users.id as userId,
             users.age,
@@ -90,7 +90,7 @@ app.get("/posts", async (req, res) => {
 app.get("/postings/:userId", async (req, res) => {
   const { userId } = req.params;
 
-  await appDataSource.query(
+  const rows = await appDataSource.query(
     `SELECT
         users.id,
         users.name,
@@ -126,7 +126,7 @@ app.patch("/posts/:postId", async (req, res) => {
     [title, content, userId]
   );
 
-  await appDataSource.query(
+  const rows = await appDataSource.query(
     `SELECT
         users.id as userId,
         users.name as userName,
