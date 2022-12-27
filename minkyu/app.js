@@ -1,17 +1,13 @@
-// env variables
-
-require("dotenv").config();
-
-// built-in package
-
-
+// built-in packages
 // third party packages
-const express = require('express');
+const dotenv = require("dotenv").config();
 const cors = require('cors');
-const morgan = require('morgan');
-
-
+const express = require('express');
+const morgan = require('morgan'); 
 const { DataSource } = require('typeorm');
+
+//custom packages
+const app = express();
 
 const database = new DataSource({
     type: process.env. TYPEORM_CONNECTION,
@@ -30,16 +26,28 @@ database.initialize()
         console.log("err");
     });
 
-const app = express();
-
 app.use(express.json());
 app.use(cors());
 app.use(morgan('tiny'));
 
 app.get("/ping", (req,res) =>{
-    res.json({message : "pong"});
+    res.status(200).json({"message" : "pong"});
 });
+        // 유저 회원가입
+app.post("/users", async(req, res) =>{
+    const { name, email, password } = req.body;
 
+    await database.query(
+        `INSERT INTO users(
+            name,
+            email,
+            password
+        ) VALUES (?, ?, ?);
+        `,
+        [ name, email, password ]
+    );
+    res.status(200).json({ message : "successfully created" });
+});
 
 const PORT = process.env.PORT;
 

@@ -35,7 +35,7 @@ app.get("/ping", (req, res) => {
 });
 
 
-app.post("/users", async (req, res, next) => {
+app.post("/users", async (req, res) => {
   const { name, age, email, password } = req.body
 
   await appDataSource.query(
@@ -51,6 +51,65 @@ app.post("/users", async (req, res, next) => {
 
   res.status(201).json({ message : "userCreated" });
 })
+
+
+app.post("/posts", async (req, res) => {
+  const { title, content, userId } = req.body
+
+  await appDataSource.query(
+    `INSERT INTO posts(
+      title,
+      content,
+      userId
+    ) VALUES (?, ?, ?);
+    `,
+    [title, content, userId]
+  );
+
+  res.status(201).json({ message : "postCreated"})
+})
+
+
+app.get("/posts", async (req, res) => {
+  await appDataSource.query(
+    `SELECT
+            users.id as userId,
+            users.age,
+            users.email,
+            users.password,
+            posts.id as postingId,
+            posts.title,
+            posts.content
+      FROM users
+      INNER JOIN posts
+      ON users.id = posts.user_id`
+,(err, rows) => {
+  res.status(200).json({data : rows});
+  })
+})
+
+  app.get("/postings/:userId", async (req, res) => {
+    const { userId } = req.params;
+  
+    await appDataSource.query(
+      `SELECT
+        users.id,
+        users.name,
+        JSON_ARRAYAGG(
+          JSON_OBJECT(
+          "postingId", posts.id,
+          "postingTitle", posts.title,
+          "postingContent", posts.content
+          )
+        ) as postings
+      FROM users
+      JOIN posts
+      ON users.id = posts.user_id AND users.id = ${userId}
+      GROUP BY users.id`  
+  ,(err, rows) => {
+    res.status(200).json({ data : rows });
+    })
+  })
 
 
 const PORT = process.env.PORT;
