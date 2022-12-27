@@ -32,10 +32,24 @@ app.use(morgan('tiny'));
 app.get("/ping", (req,res) =>{
     res.json({message : "pong"});
 });
-    // 게시글 등록하기
+
+app.post("/users", async(req, res) =>{
+    const { name, email, password } = req.body;
+
+    await database.query(
+        `INSERT INTO users(
+            name,
+            email,
+            password
+        ) VALUES (?, ?, ?);
+        `,
+        [ name, email, password ]
+    );
+    res.status(200).json({ message : "successfully created" });
+});
+
 app.post("/posting", async(req, res) => {
     const {title, content, userId} = req.body;
-    console.log(title, content, userId);
     await database.query(
         `INSERT INTO posts(
             title,
@@ -47,9 +61,9 @@ app.post("/posting", async(req, res) => {
     );
     res.status(200).json({ message : "postCreated" });
 });
-    // 게시물 조회하기
-app.get("/check", async(req, res) => {
-    await database.query(
+
+app.get("/post", async(req, res) => {
+    const result = await database.query(
         `SELECT
                 users.id as userId,
                 users.profile_image as userProfileImage,
@@ -59,27 +73,27 @@ app.get("/check", async(req, res) => {
             FROM posts
         INNER JOIN users ON users.id = posts.user_id;
         `,
-        (err, rows) => {
-            return res.status(200).json({data : rows});    
+        (err, result) => {
+            return res.status(200).json({data : result});    
         }
     );
 });
-    // 유저의 게시글 조회하기
-app.get("/pcheck/:userId", async(req, res) =>{
+
+app.get("/user/:userId/post", async(req, res) =>{
     const { userId } = req.params;
-    await database.query(
+    const postRows = await database.query(
         `SELECT
                 users.id as userId,
                 users.profile_image as userProfileImage,
-                JSON_ARRAYGG(JSON_OBJECT(   "postingId", post.post_id, 
-                                            "postingImage", post.image_url,
-                                            "postContent", post.content)) as postings
-            FROM posts
-        INNER JOIN users ON users_id = posts.user_id
+                JSON_ARRAYAGG(JSON_OBJECT(   "postingId", posts.id, 
+                                            "postingImage", posts.image_url,
+                                            "postContent", posts.content)) as postings
+        FROM posts
+        JOIN users ON users.id = posts.user_id
         WHERE posts.user_id = ?;
         `, [ userId ]
-    );                                       // json_object일 경우에는 "key", value, . . . 
-        return res.status(200).json({ data : pcheck });
+    );                                        
+        return res.status(200).json({ data : postRows });
 });
 const PORT = process.env.PORT;
 
