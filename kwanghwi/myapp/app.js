@@ -68,6 +68,7 @@ app.post("/user/signin", async (req, res) => {
 
   const [selectQuery] = await appDataSource.query(
     `SELECT
+      id,
       user_id,
       password
     FROM users
@@ -82,14 +83,14 @@ app.post("/user/signin", async (req, res) => {
 
   await checkHash(password, selectQuery.password);
 
-  const payLoad = { password: selectQuery.password };
+  const payLoad = { id: selectQuery.id };
   const jwtToken = jwt.sign(payLoad, process.env.secretKey);
 
   return res.status(200).json({ data: jwtToken });
 });
 
 app.post("/posts", validateToken, async (req, res) => {
-  const { title, content, contentImage, userId } = req.body;
+  const { title, content, contentImage } = req.body;
 
   await appDataSource.query(
     `INSERT INTO posts(
@@ -99,7 +100,7 @@ app.post("/posts", validateToken, async (req, res) => {
       user_id
     ) VALUES (?, ?, ?, ?);
     `,
-    [title, content, contentImage, userId]
+    [title, content, contentImage, req.userId]
   );
   return res.status(201).json({ message: "postcreate success!" });
 });

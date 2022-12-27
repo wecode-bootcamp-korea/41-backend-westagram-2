@@ -4,10 +4,13 @@ const validateToken = async (req, res, next) => {
   try {
     const jwtToken = req.headers.authorization;
 
-    jwt.verify(jwtToken, process.env.secretKey);
+    const tokenId = jwt.verify(jwtToken, process.env.secretKey);
+
+    req.userId = tokenId.id;
 
     next();
   } catch (err) {
+    res.status(400).json({ message: "Invalid Access Token" });
     next(err);
   }
 };
