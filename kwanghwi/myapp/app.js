@@ -66,7 +66,7 @@ app.post("/user/signup", async (req, res) => {
 app.post("/user/signin", async (req, res) => {
   const { userId, password } = req.body;
 
-  const [selectQuery] = await appDataSource.query(
+  const [user] = await appDataSource.query(
     `SELECT
       id,
       user_id,
@@ -77,13 +77,13 @@ app.post("/user/signin", async (req, res) => {
     [userId]
   );
 
-  const checkHash = async (password, hashedPassword) => {
-    return await bcrypt.compare(password, hashedPassword);
-  };
+  const match = await bcrypt.compare(password, user.password);
 
-  await checkHash(password, selectQuery.password);
+  if (!match) {
+    return res.status(400).json({ message: "invalid user" });
+  }
 
-  const payLoad = { id: selectQuery.id };
+  const payLoad = { id: user.id };
   const jwtToken = jwt.sign(payLoad, process.env.secretKey);
 
   return res.status(200).json({ data: jwtToken });
