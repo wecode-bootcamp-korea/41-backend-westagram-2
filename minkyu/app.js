@@ -30,7 +30,7 @@ app.use(cors());
 app.use(morgan('tiny'));
 
 app.get("/ping", (req,res) =>{
-    res.json({message : "pong"});
+    res.status(200).json({message : "pong"});
 });
 
 app.post("/users", async(req, res) =>{
@@ -45,7 +45,7 @@ app.post("/users", async(req, res) =>{
         `,
         [ name, email, password ]
     );
-    res.status(200).json({ message : "successfully created" });
+    res.status(201).json({ message : "successfully created" });
 });
 
 app.post("/posting", async(req, res) => {
@@ -59,7 +59,7 @@ app.post("/posting", async(req, res) => {
         `,
         [ title, content, userId ]
     );
-    res.status(200).json({ message : "postCreated" });
+    res.status(201).json({ message : "postCreated" });
 });
 
 app.get("/post", async(req, res) => {
@@ -70,13 +70,11 @@ app.get("/post", async(req, res) => {
                 posts.id as postingId,
                 posts.image_url as postingImageUrl,
                 posts.content as postingContent 
-            FROM posts
-        INNER JOIN users ON users.id = posts.user_id;
-        `,
-        (err, result) => {
-            return res.status(200).json({data : result});    
-        }
+        FROM posts
+        JOIN users ON users.id = posts.user_id;
+        `
     );
+    return res.status(200).json({data : result}); 
 });
 
 app.get("/user/:userId/post", async(req, res) =>{
@@ -93,8 +91,34 @@ app.get("/user/:userId/post", async(req, res) =>{
         WHERE posts.user_id = ?;
         `, [ userId ]
     );                                        
-        return res.status(200).json({ data : postRows });
+        return res.status(201).json({ data : postRows });
 });
+
+app.patch("/post/:postId", async (req, res) => {
+    const postId = req.params.postId;
+    const { content } = req.body;
+    await database.query(
+        `UPDATE posts SET content = ? 
+        WHERE id = ?;
+        `,[ content, postId ]
+    );
+
+    const result = await database.query(
+      `SELECT
+             users.id as userId,
+             users.name as userName,
+             posts.id as postingId,
+             posts.title as postingTitle,
+             posts.content as postingContent
+      FROM users 
+      JOIN posts ON users.id = posts.user_id
+      WHERE posts.id = ?;
+      `, [ postId ]
+    );
+  
+    res.status(201).json({ data : result });
+  });
+
 const PORT = process.env.PORT;
 
 const start = async () => {
