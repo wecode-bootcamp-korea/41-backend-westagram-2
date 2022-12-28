@@ -1,3 +1,5 @@
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
@@ -37,7 +39,7 @@ app.get("/ping", (req, res) => {
 
 app.post("/users", async (req, res) => {
   const { name, age, email, password } = req.body;
-
+  const hashedPassword = await bcrypt.hash(password, 12);
   await appDataSource.query(
     `INSERT INTO users(
       name,
@@ -46,7 +48,7 @@ app.post("/users", async (req, res) => {
       password
     ) VALUES (?, ?, ?, ?);  
     `,
-    [name, age, email, password]
+    [name, age, email, hashedPassword]
   );
 
   res.status(201).json({ message: "userCreated" });
@@ -166,6 +168,46 @@ app.post("/likes", async (req, res) => {
     [userId, postId]
   );
   res.status(201).json({ message: "likeCreated" });
+});
+
+app.get("/login", async (req, res) => {
+  const { email } = req.body;
+
+  const [userId] = await appDataSource.query(
+    `SELECT
+    users.id
+    FROM users
+    WHERE email = ?`,
+    [email]
+  );
+  const payLoad = { userId: userId.id };
+  const secretKey = "mySecretKey";
+  const jwtToken = jwt.sign(payLoad, secretKey);
+
+  const [userData] = await appDataSource.query(
+    `SELECT 
+    users.password
+    FROM users
+    WHERE email = ?`,
+    [email]
+  );
+
+  const hashedPassword = userData.password;
+  const password = req.body.password;
+
+  const checkHash = async (password, hashedPassword) => {
+    return await bcrypt.compare(password, hashedPassword);
+  };
+
+  const main = async () => {
+    const result = await checkHash(password, hashedPassword);
+    if (result) {
+      return res.status(200).json({ accessToken: jwtToken });
+    } else {
+      res.status(200).json({ message: "Invalid User" });
+    }
+  };
+  main();
 });
 
 const PORT = process.env.PORT;
