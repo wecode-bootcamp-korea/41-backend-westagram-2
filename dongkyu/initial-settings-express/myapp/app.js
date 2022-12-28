@@ -87,7 +87,7 @@ app.get("/posts", async (req, res) => {
   res.status(200).json({ data: rows });
 });
 
-app.get("/postings/:userId", async (req, res) => {
+app.get("/users/:userId/posts", async (req, res) => {
   const { userId } = req.params;
 
   const rows = await appDataSource.query(
