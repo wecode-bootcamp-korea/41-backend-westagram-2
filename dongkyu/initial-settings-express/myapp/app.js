@@ -1,3 +1,4 @@
+const bcrypt = require("bcrypt");
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
@@ -37,7 +38,7 @@ app.get("/ping", (req, res) => {
 
 app.post("/users", async (req, res) => {
   const { name, age, email, password } = req.body;
-
+  const hashedPassword = await bcrypt.hash(password, 12);
   await appDataSource.query(
     `INSERT INTO users(
       name,
@@ -46,7 +47,7 @@ app.post("/users", async (req, res) => {
       password
     ) VALUES (?, ?, ?, ?);  
     `,
-    [name, age, email, password]
+    [name, age, email, hashedPassword]
   );
 
   res.status(201).json({ message: "userCreated" });
