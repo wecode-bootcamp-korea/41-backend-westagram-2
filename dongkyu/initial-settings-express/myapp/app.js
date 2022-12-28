@@ -15,11 +15,13 @@ const appDataSource = new DataSource({
   database: process.env.TYPEORM_DATABASE,
 });
 
-appDataSource.initialize()
+appDataSource
+  .initialize()
   .then(() => {
-    console.log("Data Source has been initialized!")})
+    console.log("Data Source has been initialized!");
+  })
   .catch((err) => {
-    console.log("Failed to connect Database", err)
+    console.log("Failed to connect Database", err);
     appDataSource.destroy();
   });
 
@@ -29,14 +31,12 @@ app.use(express.json());
 app.use(cors());
 app.use(morgan("dev"));
 
-
 app.get("/ping", (req, res) => {
   return res.status(200).json({ message: "pong" });
 });
 
-
 app.post("/users", async (req, res) => {
-  const { name, age, email, password } = req.body
+  const { name, age, email, password } = req.body;
 
   await appDataSource.query(
     `INSERT INTO users(
@@ -49,29 +49,27 @@ app.post("/users", async (req, res) => {
     [name, age, email, password]
   );
 
-  res.status(201).json({ message : "userCreated" });
-})
-
+  res.status(201).json({ message: "userCreated" });
+});
 
 app.post("/posts", async (req, res) => {
-  const { title, content, userId } = req.body
+  const { title, content, userId } = req.body;
 
   await appDataSource.query(
     `INSERT INTO posts(
       title,
       content,
-      userId
+      user_id
     ) VALUES (?, ?, ?);
     `,
     [title, content, userId]
   );
 
-  res.status(201).json({ message : "postCreated"})
-})
-
+  res.status(201).json({ message: "postCreated" });
+});
 
 app.get("/posts", async (req, res) => {
-  await appDataSource.query(
+  const rows = await appDataSource.query(
     `SELECT
             users.id as userId,
             users.age,
@@ -82,17 +80,18 @@ app.get("/posts", async (req, res) => {
             posts.content
       FROM users
       INNER JOIN posts
-      ON users.id = posts.user_id`
-,(err, rows) => {
-  res.status(200).json({data : rows});
-  })
-})
+      ON users.id = posts.user_id
+    `
+  );
 
-  app.get("/postings/:userId", async (req, res) => {
-    const { userId } = req.params;
-  
-    await appDataSource.query(
-      `SELECT
+  res.status(200).json({ data: rows });
+});
+
+app.get("/users/:userId/posts", async (req, res) => {
+  const { userId } = req.params;
+
+  const rows = await appDataSource.query(
+    `SELECT
         users.id,
         users.name,
         JSON_ARRAYAGG(
@@ -104,13 +103,70 @@ app.get("/posts", async (req, res) => {
         ) as postings
       FROM users
       JOIN posts
-      ON users.id = posts.user_id AND users.id = ${userId}
-      GROUP BY users.id`  
-  ,(err, rows) => {
-    res.status(200).json({ data : rows });
-    })
-  })
+      ON users.id = posts.user_id AND users.id = ?
+      GROUP BY users.id`,
+    [userId]
+  );
 
+  res.status(200).json({ data: rows });
+});
+
+app.patch("/posts/:postId", async (req, res) => {
+  const { postId } = req.params;
+
+  const { title, content, userId } = req.body;
+
+  await appDataSource.query(
+    `UPDATE posts
+        SET 
+          title = ?,
+          content = ?
+        WHERE user_id = ?
+      `,
+    [title, content, userId]
+  );
+
+  const rows = await appDataSource.query(
+    `SELECT
+        users.id as userId,
+        users.name as userName,
+        posts.id as postingId,
+        posts.title as postingTitle,
+        posts.content as postingContent
+      FROM users
+      JOIN posts
+      ON users.id = posts.user_id AND posts.id = ?
+      `,
+    [postId]
+  );
+
+  res.status(201).json({ data: rows });
+});
+
+app.delete("/posts/:postId", async (req, res) => {
+  const { postId } = req.params;
+  await appDataSource.query(
+    `DELETE FROM posts
+        WHERE posts.id = ?
+        `,
+    [postId]
+  );
+  res.status(200).json({ message: "postingDeleted" });
+});
+
+app.post("/likes", async (req, res) => {
+  const { userId, postId } = req.body;
+
+  await appDataSource.query(
+    `INSERT INTO likes (
+        user_id,
+        post_id
+      ) VALUES (?, ?);
+      `,
+    [userId, postId]
+  );
+  res.status(201).json({ message: "likeCreated" });
+});
 
 const PORT = process.env.PORT;
 
