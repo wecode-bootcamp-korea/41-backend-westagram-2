@@ -3,6 +3,7 @@ const cors = require("cors");
 const morgan = require("morgan");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const { validateToken } = require("./auth");
 
 const dotenv = require("dotenv");
 dotenv.config();
@@ -48,8 +49,9 @@ app.post("/user/signup", async (req, res) => {
 
   const hashedPassword = await makeHash(password, saltRounds);
 
-  await appDataSource.query(
-    `INSERT INTO users(
+  try {
+    await appDataSource.query(
+      `INSERT INTO users(
       user_id,
       name,
       password,
@@ -57,8 +59,13 @@ app.post("/user/signup", async (req, res) => {
       profile_image
     ) VALUES (?, ?, ?, ?, ?);
     `,
-    [userId, name, hashedPassword, email, profileImage]
-  );
+      [userId, name, hashedPassword, email, profileImage]
+    );
+  } catch (err) {
+    console.log("SAME EMAIL ERROR");
+    return res.status(400).json({ message: "SAME EMAIL ERROR" });
+  }
+
   return res.status(201).json({ message: "signup success!" });
 });
 
@@ -87,8 +94,35 @@ app.post("/user/signin", async (req, res) => {
   return res.status(200).json({ data: jwtToken });
 });
 
-app.post("/posts", async (req, res) => {
-  const { title, content, contentImage, userId } = req.body;
+app.post("/user/signin", async (req, res) => {
+  const { userId, password } = req.body;
+
+  const [user] = await appDataSource.query(
+    `SELECT
+      id,
+      user_id,
+      password
+    FROM users
+    WHERE user_id = ?
+    `,
+    [userId]
+  );
+
+  const match = await bcrypt.compare(password, user.password);
+
+  if (!match) {
+    return res.status(400).json({ message: "invalid user" });
+  }
+
+  const payLoad = { id: user.id };
+  const jwtToken = jwt.sign(payLoad, process.env.secretKey);
+
+  return res.status(200).json({ data: jwtToken });
+});
+
+app.post("/posts", validateToken, async (req, res) => {
+  const { title, content, contentImage } = req.body;
+
   await appDataSource.query(
     `INSERT INTO posts(
       title,
@@ -97,7 +131,7 @@ app.post("/posts", async (req, res) => {
       user_id
     ) VALUES (?, ?, ?, ?);
     `,
-    [title, content, contentImage, userId]
+    [title, content, contentImage, req.userId]
   );
   return res.status(201).json({ message: "postcreate success!" });
 });
