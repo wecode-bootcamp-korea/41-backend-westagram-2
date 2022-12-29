@@ -49,8 +49,9 @@ app.post("/user/signup", async (req, res) => {
 
   const hashedPassword = await makeHash(password, saltRounds);
 
-  await appDataSource.query(
-    `INSERT INTO users(
+  try {
+    await appDataSource.query(
+      `INSERT INTO users(
       user_id,
       name,
       password,
@@ -58,8 +59,13 @@ app.post("/user/signup", async (req, res) => {
       profile_image
     ) VALUES (?, ?, ?, ?, ?);
     `,
-    [userId, name, hashedPassword, email, profileImage]
-  );
+      [userId, name, hashedPassword, email, profileImage]
+    );
+  } catch (err) {
+    console.log("SAME EMAIL ERROR");
+    return res.status(400).json({ message: "SAME EMAIL ERROR" });
+  }
+
   return res.status(201).json({ message: "signup success!" });
 });
 
