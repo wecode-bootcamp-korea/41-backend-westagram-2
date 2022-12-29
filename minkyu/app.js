@@ -56,30 +56,6 @@ app.post("/users", async(req, res) =>{
     res.status(201).json({ message : "successfully created" });
 });
 
-app.post("users/signin", async( req, res ) =>{
-    const { userId, password } = req.body;
-
-    const [user] = await database.query(
-        `SELECT
-            user_id,
-            password
-        FROM users
-        WHERE user_id = ?
-        `, [ userId ]
-    );
-
-    const match = await bcrypt.compare(password, user.password);
-
-    if (!match){
-        return res.status(400).json({ meesage : "invalid user" });
-    }
-
-    const payLoad = { id: user.id };
-    const jwtToken = jwt.sign(payLoad, process.env.secretKey);
-
-    return status(200).json({ data: jwtToken });
-});
-
 app.post("/posting", async(req, res) => {
     const {title, content, userId} = req.body;
     await database.query(
