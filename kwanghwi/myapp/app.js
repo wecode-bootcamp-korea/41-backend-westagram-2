@@ -23,22 +23,6 @@ app.get("/ping", (req, res) => {
   return res.status(200).json({ message: "pong" });
 });
 
-// app.post("/posts", validateToken, async (req, res) => {
-//   const { title, content, contentImage } = req.body;
-
-//   await appDataSource.query(
-//     `INSERT INTO posts(
-//       title,
-//       content,
-//       content_image,
-//       user_id
-//     ) VALUES (?, ?, ?, ?);
-//     `,
-//     [title, content, contentImage, req.userId]
-//   );
-//   return res.status(201).json({ message: "postcreate success!" });
-// });
-
 // app.get("/posts", async (req, res) => {
 //   await appDataSource.query(
 //     `SELECT

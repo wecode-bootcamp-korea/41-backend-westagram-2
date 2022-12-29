@@ -5,29 +5,22 @@ const jwt = require("jsonwebtoken");
 const auth = require("./auth");
 const userDao = require("../models/userDao");
 
-const signUp = async (userId, name, password, email, profileImage) => {
-  //password validation using REGEX
-  // const pwValidation = new RegExp("abcd");
+const signUp = async (email, password) => {
+  const saltRounds = 12;
 
-  // if (!pwValidation.test(password)) {
-  //   const err = new Error("PASSWORD_IS_NOT_VALID");
-  //   err.statusCode = 400;
-  //   throw err;
-  // }
+  const makeHash = async (password, saltRounds) => {
+    return await bcrypt.hash(password, saltRounds);
+  };
 
-  const createUser = await userDao.createUser(
-    userId,
-    name,
-    password,
-    email,
-    profileImage
-  );
+  const hashedPassword = await makeHash(password, saltRounds);
+
+  const createUser = await userDao.createUser(email, hashedPassword);
 
   return createUser;
 };
 
-const signIn = async (userId, password) => {
-  const [user] = await userDao.signinUser(userId);
+const signIn = async (email, password) => {
+  const [user] = await userDao.signinUser(email);
   console.log("userService, [user]:", [user]);
 
   const match = await bcrypt.compare(password, user.password);

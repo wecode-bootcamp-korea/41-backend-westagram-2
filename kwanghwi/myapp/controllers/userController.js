@@ -2,13 +2,13 @@ const userService = require("../services/userService");
 
 const signUp = async (req, res) => {
   try {
-    const { userId, name, password, email, profileImage } = req.body;
+    const { email, password } = req.body;
 
-    if (!userId || !name || !password || !email || !profileImage) {
+    if (!password || !email) {
       return res.status(400).json({ message: "KEY_ERROR" });
     }
 
-    await userService.signUp(userId, name, password, email, profileImage);
+    await userService.signUp(email, password);
 
     res.status(201).json({ message: "SIGNUP_SUCCESS" });
   } catch (err) {
@@ -19,13 +19,13 @@ const signUp = async (req, res) => {
 
 const signIn = async (req, res) => {
   try {
-    const { userId, password } = req.body;
+    const { email, password } = req.body;
 
-    if (!userId || !password) {
+    if (!email || !password) {
       return res.status(400).json({ message: "KEY_ERROR" });
     }
 
-    const token = await userService.signIn(userId, password);
+    const token = await userService.signIn(email, password);
 
     res.status(201).json({ message: `${token} SIGNIN_SUCCESS` });
   } catch (err) {
@@ -44,6 +44,8 @@ const posts = async (req, res) => {
     }
 
     await userService.posts(title, content, contentImage, req.userId);
+
+    console.log("req.userId", req.userId);
 
     res.status(201).json({ message: "POSTCREATE SUCCESS" });
   } catch (err) {

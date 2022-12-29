@@ -2,7 +2,7 @@
 
 const { appDataSource } = require("./dbconfig");
 
-const createUser = async (userId, name, password, email, profileImage) => {
+const createUser = async (email, password) => {
   // const saltRounds = 12;
 
   // const makeHash = async (password, saltRounds) => {
@@ -14,14 +14,11 @@ const createUser = async (userId, name, password, email, profileImage) => {
   try {
     return await appDataSource.query(
       `INSERT INTO users(
-          user_id,
-          name,
-          password,
           email,
-          profile_image
-        ) VALUES (?, ?, ?, ?, ?);
+          password
+        ) VALUES (?, ?);
         `,
-      [userId, name, password, email, profileImage]
+      [email, password]
     );
   } catch (err) {
     const error = new Error("INVALID_DATA_INPUT");
@@ -30,17 +27,18 @@ const createUser = async (userId, name, password, email, profileImage) => {
   }
 };
 
-const signinUser = async (userId) => {
+const signinUser = async (email) => {
   // console.log("userDao, userId : ", userId);
 
   const [user] = await appDataSource.query(
     `SELECT
-      user_id,
+      id,
+      email,
       password
     FROM users
-    WHERE user_id = ?
+    WHERE email = ?
     `,
-    [userId]
+    [email]
   );
 
   // console.log("userDao, [user] : ", [user]);
@@ -50,6 +48,7 @@ const signinUser = async (userId) => {
 
 const getUserById = async (id) => {
   //console.log("userDao, userId : ", id);
+  console.log(id);
 
   const [user] = await appDataSource.query(
     `SELECT
@@ -62,6 +61,8 @@ const getUserById = async (id) => {
   );
 
   //console.log("userDao, user : ", user);
+
+  console.log("user:", user);
 
   return user;
 };

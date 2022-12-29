@@ -22,6 +22,8 @@ const validateToken = async (req, res, next) => {
   const decoded = await jwt.verify(accessToken, process.env.secretKey);
   // console.log("auth.js, decoded:", decoded);
 
+  console.log("decoded", decoded);
+
   if (!decoded) {
     const error = new Error("INVALID_TOKEN");
     error.statusCode = 404;
@@ -35,7 +37,11 @@ const validateToken = async (req, res, next) => {
   //   "auth.js, userDao.getUserById(decoded.id): ",
   //   userDao.getUserById(decoded.id)
   // );
+
+  console.log("decoded.id:", decoded.id);
   const user = await userDao.getUserById(decoded.id);
+
+  console.log(user);
   //const [user] = userDao.signinUser(decoded.id);
   // console.log("auth.js, user.id:", user.id);
 
