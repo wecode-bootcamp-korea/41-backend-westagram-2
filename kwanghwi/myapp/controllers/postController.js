@@ -20,6 +20,18 @@ const posts = async (req, res) => {
   }
 };
 
+const list = async (req, res) => {
+  try {
+    const list = await postService.list();
+
+    res.status(201).json({ message: list });
+  } catch (err) {
+    console.log(err);
+    return res.status(err.statusCode || 500).json({ message: err.message });
+  }
+};
+
 module.exports = {
   posts,
+  list,
 };

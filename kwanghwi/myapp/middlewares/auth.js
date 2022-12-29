@@ -2,6 +2,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const userDao = require("../models/userDao");
+//const postDao = require("../models/postDao");
 
 const jwt = require("jsonwebtoken");
 
@@ -15,12 +16,9 @@ const validateToken = async (req, res, next) => {
 
     return res.status(error.statusCode).json({ message: error.message });
   }
-  // console.log("실행확인!!");
-  // console.log("auth.js, process.env.secretKey: ", process.env.secretKey);
-  // console.log("auth.js, accessToken:", accessToken);
+
   // 2) Verification token
   const decoded = await jwt.verify(accessToken, process.env.secretKey);
-  // console.log("auth.js, decoded:", decoded);
 
   console.log("decoded", decoded);
 
@@ -31,19 +29,10 @@ const validateToken = async (req, res, next) => {
     return res.status(error.statusCode).json({ message: error.message });
   }
 
-  // console.log("auth.js, decoded.id: ", decoded.id);
-
-  // console.dir(
-  //   "auth.js, userDao.getUserById(decoded.id): ",
-  //   userDao.getUserById(decoded.id)
-  // );
-
   console.log("decoded.id:", decoded.id);
   const user = await userDao.getUserById(decoded.id);
 
   console.log(user);
-  //const [user] = userDao.signinUser(decoded.id);
-  // console.log("auth.js, user.id:", user.id);
 
   if (!user.id) {
     const error = new Error("USER_DOES_NOT_EXIST");

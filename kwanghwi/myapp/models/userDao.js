@@ -3,14 +3,6 @@
 const { appDataSource } = require("./dbconfig");
 
 const createUser = async (email, password) => {
-  // const saltRounds = 12;
-
-  // const makeHash = async (password, saltRounds) => {
-  //   return await bcrypt.hash(password, saltRounds);
-  // };
-
-  // const hashedPassword = await makeHash(password, saltRounds);
-
   try {
     return await appDataSource.query(
       `INSERT INTO users(
@@ -28,8 +20,6 @@ const createUser = async (email, password) => {
 };
 
 const signinUser = async (email) => {
-  // console.log("userDao, userId : ", userId);
-
   const [user] = await appDataSource.query(
     `SELECT
       id,
@@ -41,13 +31,10 @@ const signinUser = async (email) => {
     [email]
   );
 
-  // console.log("userDao, [user] : ", [user]);
-
   return [user];
 };
 
 const getUserById = async (id) => {
-  //console.log("userDao, userId : ", id);
   console.log(id);
 
   const [user] = await appDataSource.query(
@@ -60,30 +47,13 @@ const getUserById = async (id) => {
     [id]
   );
 
-  //console.log("userDao, user : ", user);
-
   console.log("user:", user);
 
   return user;
-};
-
-const createPost = async (title, content, contentImage, userId) => {
-  const post = await appDataSource.query(
-    `INSERT INTO posts(
-      title,
-      content,
-      content_image,
-      user_id
-    ) VALUES (?, ?, ?, ?);
-    `,
-    [title, content, contentImage, userId]
-  );
-  return post;
 };
 
 module.exports = {
   createUser,
   signinUser,
   getUserById,
-  createPost,
 };

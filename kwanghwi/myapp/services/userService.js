@@ -2,7 +2,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-const auth = require("./auth");
+const auth = require("../middlewares/auth");
 const userDao = require("../models/userDao");
 
 const signUp = async (email, password) => {

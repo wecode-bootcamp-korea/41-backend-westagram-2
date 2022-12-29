@@ -4,7 +4,7 @@ const morgan = require("morgan");
 const routes = require("./routes");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const { validateToken } = require("./services/auth");
+const { validateToken } = require("./middlewares/auth");
 
 const userRoutes = require("./routes/userRouter");
 
