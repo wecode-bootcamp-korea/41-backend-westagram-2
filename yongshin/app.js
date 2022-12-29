@@ -77,22 +77,11 @@ app.get("/posts", async (req, res) => {
             posts.image_url,
             posts.content
         FROM posts
-        INNER JOIN users ON posts.user_id = users.id`
+        INNER JOIN users
+        ON posts.user_id = users.id`
     , (err, rows) => {
         res.status(200).json({ data : rows });
     })
-});
-
-app.get("/posts/:postId", async (req, res) => {
-    const { postId } = req.params;
-
-    await appDataSource.manager.query(
-        `SELECT * FROM posts
-        WHERE posts.id = ${postId}
-        `
-    ,(err, rows) => {
-        res.status(200).json({ data : rows });
-    });
 });
 
 app.get("/posts/:postId", async (req, res) => {
