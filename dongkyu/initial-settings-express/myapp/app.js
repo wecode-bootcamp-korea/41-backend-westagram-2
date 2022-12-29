@@ -1,10 +1,10 @@
+require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
-const dotenv = require("dotenv");
-dotenv.config();
+const secretKey = process.env.SECRETKEY;
 
 const { DataSource } = require("typeorm");
 
@@ -163,7 +163,7 @@ app.post("/likes", async (req, res) => {
     `INSERT INTO likes (
         user_id,
         post_id
-      ) VALUES (?, ?);
+    ) VALUES (?, ?);
       `,
     [userId, postId]
   );
@@ -175,18 +175,17 @@ app.get("/login", async (req, res) => {
 
   const [userId] = await appDataSource.query(
     `SELECT
-    users.id
+         users.id
     FROM users
     WHERE email = ?`,
     [email]
   );
   const payLoad = { userId: userId.id };
-  const secretKey = "mySecretKey";
   const jwtToken = jwt.sign(payLoad, secretKey);
 
   const [userData] = await appDataSource.query(
     `SELECT 
-    users.password
+         users.password
     FROM users
     WHERE email = ?`,
     [email]
