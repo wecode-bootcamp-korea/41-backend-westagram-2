@@ -36,19 +36,7 @@ const signIn = async (email, password) => {
   return jwtToken;
 };
 
-const posts = async (title, content, contentImage, userId) => {
-  const createPost = await userDao.createPost(
-    title,
-    content,
-    contentImage,
-    userId
-  );
-
-  return createPost;
-};
-
 module.exports = {
   signUp,
   signIn,
-  posts,
 };
