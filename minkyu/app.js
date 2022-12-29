@@ -1,12 +1,15 @@
 // third party packages
 require("dotenv").config();
 const express = require('express');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const cors = require('cors');
 const morgan = require('morgan');
 const { DataSource } = require('typeorm');
 
 // custom package
 const app = express();
+const password = 'password';
 
 const database = new DataSource({
     type: process.env. TYPEORM_CONNECTION,
@@ -35,6 +38,12 @@ app.get("/ping", (req,res) =>{
 
 app.post("/users", async(req, res) =>{
     const { name, email, password } = req.body;
+    const saltRounds = 12;
+    
+    const makeHash = async(password, saltRounds) => {
+        return await bcrypt.hash(password, saltRounds);
+    }
+    const hashedPassword = await makeHash(password, saltRounds);
 
     await database.query(
         `INSERT INTO users(
@@ -43,7 +52,7 @@ app.post("/users", async(req, res) =>{
             password
         ) VALUES (?, ?, ?);
         `,
-        [ name, email, password ]
+        [ name, email, hashedPassword ]
     );
     res.status(201).json({ message : "successfully created" });
 });
