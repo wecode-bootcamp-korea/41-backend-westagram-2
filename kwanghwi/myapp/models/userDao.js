@@ -35,8 +35,6 @@ const signinUser = async (email) => {
 };
 
 const getUserById = async (id) => {
-  console.log(id);
-
   const [user] = await appDataSource.query(
     `SELECT
       id,
@@ -46,9 +44,6 @@ const getUserById = async (id) => {
     `,
     [id]
   );
-
-  console.log("user:", user);
-
   return user;
 };
 

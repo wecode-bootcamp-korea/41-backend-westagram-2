@@ -29,7 +29,73 @@ const selectPosts = async () => {
   return post;
 };
 
+const selectuserPost = async (userId) => {
+  const post = await appDataSource.query(
+    `SELECT
+        users.id,
+        users.profile_image as userProfileImage,
+        JSON_ARRAYAGG(JSON_OBJECT("postingId", posts.id, "postingImageUrl", posts.content_image, "postingContent", posts.content)) as postings
+    FROM posts
+
+    INNER JOIN users ON users.id = posts.user_id
+    WHERE posts.user_id = ?
+    GROUP BY users.id;
+      `,
+    [userId]
+  );
+  return post;
+};
+
+const patchPost = async (title, content, postId, userId) => {
+  await appDataSource.query(
+    `UPDATE posts SET
+        title = ?,
+        content = ?
+    WHERE
+        id = ?
+    AND
+        user_id = ?;
+    `,
+    [title, content, postId, userId]
+  );
+
+  const postRow = await appDataSource.query(
+    `SELECT
+        users.id as userId,
+        users.name as userName,
+        posts.id as postingId,
+        posts.title as postingTitle,
+        posts.content as postingContent
+        FROM posts
+    INNER JOIN users ON users.id = posts.user_id
+    WHERE
+        posts.id = ?
+    AND
+        posts.user_id = ?;
+    `,
+    [postId, userId]
+  );
+  return postRow;
+};
+
+const deletePost = async (userId, postId) => {
+  const deletepost = await appDataSource.query(
+    `DELETE FROM posts
+      WHERE
+        user_id = ?
+      AND
+        id = ?
+    `,
+    [userId, postId]
+  );
+
+  return deletepost;
+};
+
 module.exports = {
   createPost,
   selectPosts,
+  selectuserPost,
+  patchPost,
+  deletePost,
 };

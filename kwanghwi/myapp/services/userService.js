@@ -2,7 +2,6 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-const auth = require("../middlewares/auth");
 const userDao = require("../models/userDao");
 
 const signUp = async (email, password) => {
@@ -21,12 +20,11 @@ const signUp = async (email, password) => {
 
 const signIn = async (email, password) => {
   const [user] = await userDao.signinUser(email);
-  console.log("userService, [user]:", [user]);
 
   const match = await bcrypt.compare(password, user.password);
 
   const payLoad = { id: user.id };
-  console.log("userService, process.env.secretKey: ", process.env.secretKey);
+
   const jwtToken = jwt.sign(payLoad, process.env.secretKey);
 
   if (!match) {

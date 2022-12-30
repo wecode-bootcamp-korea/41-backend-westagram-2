@@ -5,7 +5,9 @@ const router = express.Router();
 
 const userRouter = require("./userRouter");
 const postRouter = require("./postRouter");
-router.use("/user", userRouter.router);
-router.use("", postRouter.router);
+const likeRouter = require("./likeRouter");
+router.use("/users", userRouter.router);
+router.use("/posts", postRouter.router);
+router.use("/likes", likeRouter.router);
 
 module.exports = router;

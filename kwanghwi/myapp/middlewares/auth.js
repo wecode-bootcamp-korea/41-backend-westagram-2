@@ -20,19 +20,13 @@ const validateToken = async (req, res, next) => {
   // 2) Verification token
   const decoded = await jwt.verify(accessToken, process.env.secretKey);
 
-  console.log("decoded", decoded);
-
   if (!decoded) {
     const error = new Error("INVALID_TOKEN");
     error.statusCode = 404;
 
     return res.status(error.statusCode).json({ message: error.message });
   }
-
-  console.log("decoded.id:", decoded.id);
   const user = await userDao.getUserById(decoded.id);
-
-  console.log(user);
 
   if (!user.id) {
     const error = new Error("USER_DOES_NOT_EXIST");
@@ -42,7 +36,6 @@ const validateToken = async (req, res, next) => {
   }
 
   // 4) GRANT ACCESS
-  console.log("??????????????????실행 확인!!");
   req.userId = user.id;
   next();
 };
